@@ -9,7 +9,7 @@ Pour naviquer il vous suffit d'utiliser les touches directionnels, la touche ent
 Lorsque vous allez de menu en menu ne rester pas appuyer sur la touches entré elle risque d'aller direct d'un menu à l'autres,
 il vous suffit donc de n'appuyer qu'une seul fois frénétiquement.
 
-Les scores sont stocké dans le fichier yaml.
+Les scores sont stocké dans le fichier yaml. 
 Ne modifié pas les noms, et les compositions des fichiers sous peine de bug.
 
 Je vous souhaite un bon jeu :D
