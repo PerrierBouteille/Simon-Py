@@ -10,6 +10,7 @@ Lorsque vous allez de menu en menu ne rester pas appuyer sur la touches entré e
 il vous suffit donc de n'appuyer qu'une seul fois frénétiquement.
 
 Les scores sont stocké dans le fichier yaml. 
+
 Ne modifié pas les noms, et les compositions des fichiers sous peine de bug.
 
 Je vous souhaite un bon jeu :D
