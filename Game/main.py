@@ -1,0 +1,741 @@
+#!/usr/bin/python3
+#-*- coding:Utf-8 -*-
+
+#=== Import des modules 
+from cProfile import run
+import pygame
+from pygame.locals import *
+from random import randrange 
+from database import *
+import yaml
+from operator import itemgetter
+
+pygame.init()
+pygame.mixer.pre_init(44100, 16, 1, 4096)
+pygame.display.set_caption("Simon - Py")
+#================================================================================================================= Ressources
+
+#=== liste des couleur utilisé , rangé suivant cet ordre ---> vert,rouge,bleu,jaune
+couleur_sombre = [(0,90,0), (155,0,0), (0,55,125), (160,150,0)]
+couleur_clair = [(0,225,0), (243,0,0), (0,205,255), (255,255,0)]
+blanc, noir, rouge, bleu, jaune, vert, rose, argent, bronze, orange = (255,255,255), (0,0,0), (225,0,0), (0,15,255), (255,185,0), (0,195,25), (195,0,115), (170,170,170), (196, 156, 72), (230,65,0)
+
+#=== liste de la position des couleurs sous la forme ((coin_haut_gauche_x,coin_haut_gauche_y),(largeur,hauteur))
+#=== Ordre de rangement identique a la liste de couleur--> vert,rouge,bleu,jaune
+
+#liste_pos = [((15,15),(225,225)) , ((260,15),(225,225)) , ((15,260),(225,225)) ,  ((260,260),(225,225))]
+liste_pos = [((15,140),(140,225)) , ((140,15),(225,140)) , ((140,350),(225,135)) ,  ((350,140),(135,225))]
+#Vert/Rouge/Bleu/Jaune
+#=== Images
+centre , fond , titre, help ,titre1= 'Game/data/none.png' , 'Game/data/fond3.png' , 'Game/data/titre.png', 'Game/data/aide.png','Game/data/titre1.png'
+
+#==== Sons
+son1 = pygame.mixer.Sound("Game/data/son1.wav")
+son2 = pygame.mixer.Sound("Game/data/son2.wav")
+son3 = pygame.mixer.Sound("Game/data/son3.wav")
+son4 = pygame.mixer.Sound("Game/data/son4.wav")
+liste_son = [son1, son2, son3, son4]
+
+global defi
+defi = 0
+
+global rundefi
+rundefi = 0
+ 
+#======================================================================================================= Classes et fonctions 
+
+def Image(image):
+    '''____Fonction de chargement d'image___
+       - nom de l'image
+       - attribut alpha : Bool
+    '''
+                                           
+    x =pygame.image.load(image).convert_alpha()
+    return x
+    
+class Draw_rect :
+    '''______Création de rectange(s)______
+       - 2 méthodes possibles : 
+             1 - gen -> dessine 1 carré 
+                     - couleur
+                     - position
+             2 - gen_bg -> dessine les 4 carrés formant le fond
+    '''
+    def __init__(self):
+        pass
+    
+    def gen(self,couleur,position):
+        x = pygame.draw.rect(screen, couleur, Rect(position))
+        return x
+                                                 
+    def gen_bg(self):
+        n = 0
+        while n != len(couleur_sombre):
+            x = pygame.draw.rect(screen, couleur_sombre[n], Rect(liste_pos[n]))
+            n += 1
+
+class Texte :
+    '''______Afficher un texte_____
+       les attributs : 
+       - texte 
+       - taille de la font 
+       - couleur - position
+       @ -la police sera celle par défaut , sa suffira bien ^^
+    '''
+    def __init__(self, texte, taille, couleur, position):
+        self.texte = texte
+        self.taille = taille
+        self.couleur = couleur
+        self.position = position
+        
+        
+    def affiche (self):    
+        
+        font = pygame.font.Font(None, self.taille)
+        text = font.render(self.texte, 1, self.couleur) 
+        text_pos = text.get_rect()
+        text_pos.center = (self.position)
+
+        screen.blit(text, text_pos)
+
+        
+        
+class Sequence :
+    '''_______Génère séquence________
+       info : "seq" = séquence
+    '''
+    def __init__(self):
+        self.level = 1
+        self.seqordi = ''
+        self.seq_player = ''
+    
+    def gen_seq(self):
+        n = 0
+        self.seqordi = ''
+        while n != self.level :        
+            x = randrange(4)
+            self.seqordi += str(x)
+            n += 1    
+        return self.seqordi
+        
+    def change_level(self,win):
+        if win == 1:
+            self.level += 1
+        if win == 0:   
+            print("[Logs] > Defi ", defi)
+            print("[Logs] > self.level ", self.level)
+            name = input("Vôtre Pseudo : ")
+                       
+            if (defi) == self.level :
+                score = 0
+            else :
+                score = self.level - 1
+            Database(name,score)
+    
+    
+           
+playerOne = Sequence()
+
+#=============================================================================================================  Variables
+menu , pause , play , aide, score, playmenu, challenge, speedmenu, sensgame =  1 , 0 , 0, 0, 0, 0, 0, 0, 0  # Acces aux boucles 
+choix_menu, choix_playmenu, choix_challenge, choix_speed, choix_blind = 0, 0, 0, 0, 0
+tourOrdi , tourPlayer = 0,0 
+#------
+x = -0
+w = 1
+
+x2 = -0
+w2 = 1
+
+x3 = -0
+w3 = 1
+
+x4 = -0
+w4 = 1
+
+x5 = -0
+w5 = 1
+#------
+a = 0
+seq_ordi, seq_joueur = '' , ''
+compteur , go = 0, 0
+dataload = 1
+#=========================================================================================== Création de la fenètre principal
+screen = pygame.display.set_mode((500,600))
+
+
+#========================================================================================================== Boucle principale    
+#==============================================================================================================|- Menu accueil
+#==============================================================================================================|- Pause
+#==============================================================================================================|- Jeu
+
+while True :
+    
+    while menu :
+        speed = 75
+        
+        for event in pygame.event.get():
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+                exit()
+            if event.type == KEYDOWN :
+                if event.key == K_UP:
+                        choix_menu -= 1
+                if event.key == K_DOWN:
+                        choix_menu += 1
+               
+            if choix_menu == 4 :
+                choix_menu = 0
+            if choix_menu == -1:
+                choix_menu = 3        
+        
+        if x == 5 :
+            w = -1
+        if x == 0 :
+            w = 1
+        x += w
+        screen.fill(noir)
+        cadre = Draw_rect().gen((46,52,54),((0,200),(500,275)))
+        screen.blit((Image(titre1)),(10,0)) 
+        textMenu = Texte('Menu principal', 75, noir, (cadre.centerx,cadre.top + 45)).affiche()
+        textMenu = Texte('Menu principal', 70, blanc, (cadre.centerx,cadre.top + 40)).affiche()        
+        textMenu = Texte('Jouer', 60, noir, (cadre.centerx,cadre.top + 100)).affiche()
+        textMenu = Texte('Aide', 60, noir, (cadre.centerx,cadre.top + 150)).affiche()
+        textMenu = Texte('Score', 60, noir, (cadre.centerx,cadre.top + 200)).affiche()
+        textMenu = Texte('Quitter', 60, noir, (cadre.centerx,cadre.top + 250)).affiche()
+            
+        if choix_menu == 0 :           
+            textMenu = Texte('Jouer', 60+x, jaune, (cadre.centerx,cadre.top + 100)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                menu = 0
+                playmenu = 1
+                #play = 1
+                #tourOrdi = 1
+                                
+        if choix_menu == 1 :
+            textMenu = Texte('Aide', 60+x, vert, (cadre.centerx,cadre.top + 150)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                menu = 0        
+                aide = 1   
+        if choix_menu == 2:
+            textMenu = Texte('Score', 60+x, bleu, (cadre.centerx,cadre.top + 200)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                menu = 0
+                score = 1
+                dataload = 1
+        if choix_menu == 3 :
+            textMenu = Texte('Quitter', 60+x, rouge, (cadre.centerx,cadre.top + 250)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                exit()
+        
+        pygame.time.wait(speed)
+        pygame.display.flip()
+                
+
+    while playmenu:
+        speed = 75
+        for event in pygame.event.get():
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+                playmenu = 0
+                choix_menu = 0
+                menu = 1
+                choix_playmenu = 0
+            if event.type == KEYDOWN :
+                if event.key == K_UP:
+                        choix_playmenu -= 1
+                if event.key == K_DOWN:
+                        choix_playmenu += 1
+            
+            if choix_playmenu == 4 :
+                choix_playmenu = 0
+            if choix_playmenu == -1:
+                choix_playmenu = 3    
+        
+        if x2 == 3 :
+            w2 = -1
+        if x2 == 0 :
+            w2 = 1
+        x2 += w2
+        screen.fill(noir)
+        cadre = Draw_rect().gen((46,52,54),((0,200),(500,275)))
+        screen.blit((Image(titre1)),(10,0)) 
+        textMenu = Texte('Options de jeu', 75, noir, (cadre.centerx,cadre.top + 45)).affiche()
+        textMenu = Texte('Options de jeu', 70, blanc, (cadre.centerx,cadre.top + 40)).affiche()        
+        textMenu = Texte('Classique', 60, noir, (cadre.centerx,cadre.top + 100)).affiche()
+        textMenu = Texte('Challenges', 60, noir, (cadre.centerx,cadre.top + 150)).affiche()
+        textMenu = Texte('Speed Run', 60, noir, (cadre.centerx,cadre.top + 200)).affiche()
+        textMenu = Texte('No Sense', 60, noir, (cadre.centerx,cadre.top + 250)).affiche()
+            
+        if choix_playmenu == 0 :           
+            textMenu = Texte('Classique', 60+x2, vert, (cadre.centerx,cadre.top + 100)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                playmenu = 0
+                play = 1
+                tourOrdi = 1
+                                
+        if choix_playmenu == 1 :
+            textMenu = Texte('Challenges', 60+x2, jaune, (cadre.centerx,cadre.top + 150)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                challenge = 1
+                playmenu = 0
+
+        if choix_playmenu == 2 :
+            textMenu = Texte('Speed Run', 60+x2, orange, (cadre.centerx,cadre.top + 200)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                playmenu = 0
+                speedmenu = 1
+        
+        if choix_playmenu == 3:
+            textMenu = Texte('No Sense', 60+x2, rouge, (cadre.centerx,cadre.top + 250)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                playmenu = 0
+                sensgame = 1
+        
+        pygame.time.wait(speed)
+        pygame.display.flip()
+
+####################################################################################################
+
+    while challenge:
+        speed = 75
+        
+        for event in pygame.event.get():
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+                challenge = 0
+                playmenu = 1
+                choix_challenge = 0
+            if event.type == KEYDOWN :
+                if event.key == K_UP:
+                        choix_challenge -= 1
+                if event.key == K_DOWN:
+                        choix_challenge += 1
+               
+            if choix_challenge == 3 :
+                choix_challenge = 0
+            if choix_challenge == -1:
+                choix_challenge = 2      
+        
+        if x3 == 5 :
+            w3 = -1
+        if x3 == 0 :
+            w3 = 1
+        x3 += w3
+        screen.fill(noir)
+        cadre = Draw_rect().gen((46,52,54),((0,200),(500,275)))
+        screen.blit((Image(titre1)),(10,0))
+        textMenu = Texte('Liste des Challenges', 70, noir, (cadre.centerx,cadre.top + 45)).affiche()
+        textMenu = Texte('Liste des Challenges', 67, blanc, (cadre.centerx,cadre.top + 40)).affiche()
+        textMenu = Texte('Challenge 10', 60, noir, (cadre.centerx,cadre.top + 125)).affiche()
+        textMenu = Texte('Challenge 50', 60, noir, (cadre.centerx,cadre.top + 175)).affiche()
+        textMenu = Texte('Challenge 100', 60, noir, (cadre.centerx,cadre.top + 225)).affiche()
+        if choix_challenge == 0 :
+            textMenu = Texte('Challenge 10', 60+x3, jaune, (cadre.centerx,cadre.top + 125)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                challenge = 0
+                play = 1
+                tourOrdi = 1
+                defi = 10
+                playerOne.level = defi
+                
+                
+        if choix_challenge == 1:
+            textMenu = Texte('Challenge 50', 60+x3, orange, (cadre.centerx,cadre.top + 175)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                challenge = 0
+                play = 1
+                tourOrdi = 1
+                defi = 50
+                playerOne.level = defi
+
+        if choix_challenge == 2:
+            textMenu = Texte('Challenge 100', 60+x3, rouge, (cadre.centerx,cadre.top + 225)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                challenge = 0
+                play = 1
+                tourOrdi = 1
+                defi = 100
+                playerOne.level = defi
+        
+        pygame.time.wait(speed)
+        pygame.display.flip()
+
+    while speedmenu:
+        speed = 75
+        
+        for event in pygame.event.get():
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+                speedmenu = 0
+                playmenu = 1
+                choix_speed = 0
+            if event.type == KEYDOWN :
+                if event.key == K_UP:
+                        choix_speed -= 1
+                if event.key == K_DOWN:
+                        choix_speed += 1
+               
+            if choix_speed == 3 :
+                choix_speed = 0
+            if choix_speed == -1:
+                choix_speed = 2      
+        
+        if x4 == 5 :
+            w4 = -1
+        if x4 == 0 :
+            w4 = 1
+        x4 += w4
+        screen.fill(noir)
+        cadre = Draw_rect().gen((46,52,54),((0,200),(500,275)))
+        screen.blit((Image(titre1)),(10,0))
+        textMenu = Texte('Liste des SpeedRun', 70, noir, (cadre.centerx,cadre.top + 45)).affiche()
+        textMenu = Texte('Liste des SpeedRun', 67, blanc, (cadre.centerx,cadre.top + 40)).affiche()
+        textMenu = Texte('SpeedRun [x2]', 60, noir, (cadre.centerx,cadre.top + 125)).affiche()
+        textMenu = Texte('SpeedRun [x3]', 60, noir, (cadre.centerx,cadre.top + 175)).affiche()
+        textMenu = Texte('SpeedRun [x5]', 60, noir, (cadre.centerx,cadre.top + 225)).affiche()
+        if choix_speed == 0 :
+            textMenu = Texte('SpeedRun [x2]', 60+x4, jaune, (cadre.centerx,cadre.top + 125)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                rundefi = 1
+                play = 1
+                tourOrdi = 1
+                speedmenu = 0
+                
+                
+        if choix_speed == 1:
+            textMenu = Texte('SpeedRun [x3]', 60+x4, orange, (cadre.centerx,cadre.top + 175)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                rundefi = 2
+                play = 1
+                tourOrdi = 1
+                speedmenu = 0
+
+        if choix_speed == 2:
+            textMenu = Texte('SpeedRun [x5]', 60+x4, rouge, (cadre.centerx,cadre.top + 225)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                rundefi = 3
+                play = 1
+                tourOrdi = 1
+                speedmenu = 0
+        
+        pygame.time.wait(speed)
+        pygame.display.flip()
+
+    while sensgame:
+        speed = 75
+        
+        for event in pygame.event.get():
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+                sensgame = 0
+                playmenu = 1
+                choix_blind = 0
+            if event.type == KEYDOWN :
+                if event.key == K_UP:
+                        choix_blind -= 1
+                if event.key == K_DOWN:
+                        choix_blind += 1
+               
+            if choix_blind == 3 :
+                choix_blind = 0
+            if choix_blind == -1:
+                choix_blind = 2      
+        
+        if x5 == 5 :
+            w5 = -1
+        if x5 == 0 :
+            w5 = 1
+        x5 += w5
+        screen.fill(noir)
+        cadre = Draw_rect().gen((46,52,54),((0,200),(500,275)))
+        screen.blit((Image(titre1)),(10,0))
+        textMenu = Texte('Liste des SenseGame', 70, noir, (cadre.centerx,cadre.top + 45)).affiche()
+        textMenu = Texte('Liste des SenseGame', 67, blanc, (cadre.centerx,cadre.top + 40)).affiche()
+        textMenu = Texte('Blindness', 60, noir, (cadre.centerx,cadre.top + 125)).affiche()
+        textMenu = Texte('Soundless', 60, noir, (cadre.centerx,cadre.top + 175)).affiche()
+        textMenu = Texte('Soon...', 60, noir, (cadre.centerx,cadre.top + 225)).affiche()
+        if choix_blind == 0 :
+            textMenu = Texte('Blindness', 60+x5, jaune, (cadre.centerx,cadre.top + 125)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                blindness = 1
+                play = 1
+                tourOrdi = 1
+                speedmenu = 0
+                
+                
+        if choix_blind == 1:
+            textMenu = Texte('Soundless', 60+x5, orange, (cadre.centerx,cadre.top + 175)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                nosound = 1
+                play = 1
+                tourOrdi = 1
+                speedmenu = 0
+
+        if choix_blind == 2:
+            textMenu = Texte('Soon...', 60+x5, rouge, (cadre.centerx,cadre.top + 225)).affiche()
+            if event.type == KEYDOWN and event.key == K_RETURN :
+                print("[Logs] > Jeu indisponible.")
+        
+        pygame.time.wait(speed)
+        pygame.display.flip()
+
+#################################################################################################################
+
+    while aide:
+
+        screen.fill(noir)
+        cadre = Draw_rect().gen((46,52,54),((0,200),(500,250)))
+        textMenu = Texte('Commandes :', 40, noir, (125,cadre.top + 30)).affiche()
+        screen.blit((Image(help)),(0,200))
+        screen.blit((Image(titre1)),(10,0))
+        
+        pygame.time.wait(speed)
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE :
+                aide = 0
+                menu = 1
+        
+
+
+    while score:
+        
+        screen.fill(noir)
+        cadre = Draw_rect().gen((46,52,54),((0,100),(500,400)))
+        textMenu = Texte('Meilleurs Scores', 40, noir, (cadre.centerx,cadre.top + 30)).affiche()
+        textMenu = Texte('____________________________________', 40, noir, (cadre.centerx,cadre.top + 35)).affiche()
+        pygame.time.wait(speed)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE :
+                score = 0
+                menu = 1
+                dataload = 0
+        
+        if dataload == 1:
+            dataload = 0
+            loading = ()
+            ScorePlayer = []
+            with open('Game/database.yaml') as f:
+            
+                topscores = yaml.load_all(f, Loader=yaml.SafeLoader)
+
+                for doc in topscores:
+                
+                    for k, v in doc.items():
+                        print("[Logs] > ", k, "->", v)
+                        
+                        v = str(v).replace("{'score': '", "")
+                        v = v.replace("'}", "")
+                        
+                        loading += (k,)
+                        loading += (int(v),)
+
+                        ScorePlayer.append(loading)
+
+                        loading = ()
+                        print(loading)
+                        print(ScorePlayer)
+                        ScorePlayer.sort(key=lambda x:x[1])
+                        ScorePlayer.reverse()
+                        print(ScorePlayer)
+
+            #--------------------------------------------------
+
+            if len(ScorePlayer) >= 1:
+                print("[Logs] > " + str(ScorePlayer[0]))
+                ScorePlayerAffichage1 = str(ScorePlayer[0][1])
+                print("[Logs] > " + ScorePlayerAffichage1)
+            if len(ScorePlayer) >= 2:
+                print("[Logs] > " + str(ScorePlayer[1]))
+                ScorePlayerAffichage2 = str(ScorePlayer[1][1])
+                print("[Logs] > " + ScorePlayerAffichage2)
+            if len(ScorePlayer) >= 3:
+                print("[Logs] > " + str(ScorePlayer[2]))
+                ScorePlayerAffichage3 = str(ScorePlayer[2][1])
+                print("[Logs] > " + ScorePlayerAffichage3)
+            if len(ScorePlayer) >= 4:
+                print("[Logs] > " + str(ScorePlayer[3]))
+                ScorePlayerAffichage4 = str(ScorePlayer[3][1])
+                print("[Logs] > " + ScorePlayerAffichage4)
+            if len(ScorePlayer) >= 5:
+                print("[Logs] > " + str(ScorePlayer[4]))
+                ScorePlayerAffichage5 = str(ScorePlayer[4][1])
+                print("[Logs] > " + ScorePlayerAffichage5)
+            if len(ScorePlayer) >= 6:
+                print("[Logs] > " + str(ScorePlayer[5]))
+                ScorePlayerAffichage6 = str(ScorePlayer[5][1])
+                print("[Logs] > " + ScorePlayerAffichage6)
+            if len(ScorePlayer) >= 7:
+                print("[Logs] > " + str(ScorePlayer[6]))
+                ScorePlayerAffichage7 = str(ScorePlayer[6][1])
+                print("[Logs] > " + ScorePlayerAffichage7)
+            if len(ScorePlayer) >= 8:
+                print("[Logs] > " + str(ScorePlayer[7]))
+                ScorePlayerAffichage8 = str(ScorePlayer[7][1])
+                print("[Logs] > " + ScorePlayerAffichage8)
+            if len(ScorePlayer) >= 9:
+                print("[Logs] > " + str(ScorePlayer[8]))
+                ScorePlayerAffichage9 = str(ScorePlayer[8][1])
+                print("[Logs] > " + ScorePlayerAffichage9)
+            if len(ScorePlayer) >= 10:
+                print("[Logs] > " + str(ScorePlayer[9]))
+                ScorePlayerAffichage10 = str(ScorePlayer[9][1])
+                print("[Logs] > " + ScorePlayerAffichage10)
+            dataloaded = 1    
+
+        if dataloaded == 1:
+            #dataloaded = 0
+            textMenu = Texte("Top 1 :", 40, jaune, (75,cadre.top + 75)).affiche()
+            textMenu = Texte("Top 2 :", 40, argent, (75,cadre.top + 105)).affiche()
+            textMenu = Texte("Top 3 :", 40, bronze, (75,cadre.top + 135)).affiche()
+            textMenu = Texte("Top 4 :", 40, blanc, (75,cadre.top + 165)).affiche()
+            textMenu = Texte("Top 5 :", 40, blanc, (75,cadre.top + 195)).affiche()
+            textMenu = Texte("Top 6 :", 40, blanc, (75,cadre.top + 225)).affiche()
+            textMenu = Texte("Top 7 :", 40, blanc, (75,cadre.top + 255)).affiche()
+            textMenu = Texte("Top 8 :", 40, blanc, (75,cadre.top + 285)).affiche()
+            textMenu = Texte("Top 9 :", 40, blanc, (75,cadre.top + 315)).affiche()
+            textMenu = Texte("Top 10:", 40, blanc, (75,cadre.top + 345)).affiche()
+
+            if len(ScorePlayer) >= 1:
+                textMenu = Texte(str(ScorePlayer[0][0]) + " | " + str(ScorePlayerAffichage1), 40, jaune, (cadre.centerx,cadre.top + 75)).affiche()
+            if len(ScorePlayer) >= 2:        
+                textMenu = Texte(str(ScorePlayer[1][0]) + " | " + str(ScorePlayerAffichage2), 40, argent, (cadre.centerx,cadre.top + 105)).affiche()
+            if len(ScorePlayer) >= 3:               
+                textMenu = Texte(str(ScorePlayer[2][0]) + " | " + str(ScorePlayerAffichage3), 40, bronze, (cadre.centerx,cadre.top + 135)).affiche()
+            if len(ScorePlayer) >= 4:                
+                textMenu = Texte(str(ScorePlayer[3][0]) + " | " + str(ScorePlayerAffichage4), 40, blanc, (cadre.centerx,cadre.top + 165)).affiche()
+            if len(ScorePlayer) >= 5:                
+                textMenu = Texte(str(ScorePlayer[4][0]) + " | " + str(ScorePlayerAffichage5), 40, blanc, (cadre.centerx,cadre.top + 195)).affiche()
+            if len(ScorePlayer) >= 6:                
+                textMenu = Texte(str(ScorePlayer[5][0]) + " | " + str(ScorePlayerAffichage6), 40, blanc, (cadre.centerx,cadre.top + 225)).affiche()
+            if len(ScorePlayer) >= 7:                
+                textMenu = Texte(str(ScorePlayer[6][0]) + " | " + str(ScorePlayerAffichage7), 40, blanc, (cadre.centerx,cadre.top + 255)).affiche()
+            if len(ScorePlayer) >= 8:                
+                textMenu = Texte(str(ScorePlayer[7][0]) + " | " + str(ScorePlayerAffichage8), 40, blanc, (cadre.centerx,cadre.top + 285)).affiche()
+            if len(ScorePlayer) >= 9:                
+                textMenu = Texte(str(ScorePlayer[8][0]) + " | " + str(ScorePlayerAffichage9), 40, blanc, (cadre.centerx,cadre.top + 315)).affiche()
+            if len(ScorePlayer) >= 10:                
+                textMenu = Texte(str(ScorePlayer[9][0]) + " | " + str(ScorePlayerAffichage10), 40, blanc, (cadre.centerx,cadre.top + 345)).affiche()
+            pygame.display.flip()
+                        
+    
+
+
+
+    while play:
+    
+        if playerOne.level == 0:
+            play , tourOrdi ,menu = 0 , 0 , 1
+            playerOne = Sequence()
+        
+        
+        compteur = 0
+        seq_ordi = ''
+        seq_joueur = ''
+        
+        while tourOrdi :
+            if rundefi == 0:
+                speed = 250
+            if rundefi == 1:
+                speed = 125
+            if rundefi == 2:
+                speed = 85
+            if rundefi == 3:
+                speed = 50
+            
+            screen.fill(noir)
+            Draw_rect().gen_bg()
+                       
+            for event in pygame.event.get():
+                if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+                    play = 0
+                    tourOrdi = 0
+                    menu = 1
+                    
+                if event.type == KEYDOWN and event.key == K_SPACE :
+                    if seq_ordi == '' :
+                        seq_ordi = playerOne.gen_seq()
+                        go = 1
+
+            if go == 1:
+                if a % 2 == 0 :
+                
+                    if compteur != playerOne.level :
+                        #if sound == 0:
+                        liste_son[int(seq_ordi[compteur])].play()
+                        # if blind == 0:
+                        Draw_rect().gen(couleur_clair[int(seq_ordi[compteur])],liste_pos[int(seq_ordi[compteur])])
+                        compteur += 1
+                            
+                
+                
+                a += 1
+                if compteur  == playerOne.level :
+                    tourOrdi = 0
+                    tourPlayer = 1
+                    go = 0 
+
+            screen.blit((Image(centre)),(0,0))
+            screen.blit((Image(fond)),(0,0))
+            screen.blit((Image(titre)),(0,500))
+            extMenu = Texte('{}'.format(playerOne.level), 50, blanc, (425,565)).affiche()
+            
+            pygame.display.flip()
+            pygame.time.wait(speed)
+        while tourPlayer :
+            speed = 80
+            screen.fill(noir)
+            Draw_rect().gen_bg()
+            
+            for event in pygame.event.get():
+                if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+                    tourPlayer = 0
+                    play = 0
+                    menu = 1
+
+                if event.type == KEYDOWN :
+                    if event.key == K_UP:
+                        seq_joueur += '1'
+                        son1.play()
+                        #Draw_rect().gen(couleur_clair[0],liste_pos[0])
+                        Draw_rect().gen(couleur_clair[1],liste_pos[1])
+                        print("[Logs] (Séquence) > " + seq_joueur)
+                    if event.key == K_DOWN:    
+                        seq_joueur += '2'
+                        son2.play()
+                        #Draw_rect().gen(couleur_clair[1],liste_pos[1])
+                        Draw_rect().gen(couleur_clair[2],liste_pos[2])
+                        print("[Logs] (Séquence) > " + seq_joueur)
+                    if event.key == K_LEFT:
+                        seq_joueur += '0'
+                        son3.play()
+                        #Draw_rect().gen(couleur_clair[2],liste_pos[2])
+                        Draw_rect().gen(couleur_clair[0],liste_pos[0])
+                        print("[Logs] (Séquence) > " + seq_joueur)
+                    if event.key == K_RIGHT:
+                        seq_joueur += '3'
+                        son4.play()
+                        #Draw_rect().gen(couleur_clair[3],liste_pos[3])
+                        Draw_rect().gen(couleur_clair[3],liste_pos[3])
+                        print("[Logs] (Séquence) > " + seq_joueur)
+                       
+                           
+            if len(seq_joueur) == len(seq_ordi):        #si la longueur de la séquence du joueur est égal a celle de l'ordi, on compare
+                
+                print("[Logs] > " + seq_joueur + " | " + seq_ordi)
+                if seq_joueur != seq_ordi :
+                    playerOne.change_level(0)
+                    play , tourOrdi ,menu = 0 , 0 , 1
+                    playerOne = Sequence()
+                if seq_joueur == seq_ordi :
+                    playerOne.change_level(1)
+                
+                
+                
+                tourPlayer = 0
+                tourOrdi = 1
+       
+            screen.blit((Image(centre)),(0,0))
+            screen.blit((Image(fond)),(0,0))
+            screen.blit((Image(titre)),(0,500))
+            extMenu = Texte('{}'.format(playerOne.level), 50, blanc, (425,565)).affiche()
+            pygame.time.wait(speed)
+            pygame.display.flip()
