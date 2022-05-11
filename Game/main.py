@@ -11,6 +11,9 @@ import yaml
 from operator import itemgetter
 from time import *
 
+#Démarrage du jeu / Menu de chargement
+
+print("Démarrage en cours..")
 pygame.init()
 pygame.mixer.pre_init(44100, 16, 1, 4096)
 pygame.display.set_caption("Simon - Py")
@@ -39,6 +42,11 @@ screen.blit(charg, (185,300))
 screen.blit(author, (130,325))
 pygame.display.flip()
 sleep(1)
+print("_______________________________________")
+print("                                       ")
+print(" Simon-Py vous souhaite la bienvenue ! ")
+print("_______________________________________")
+print("                                       ")
 
 #================================================================================================================= Ressources
 
@@ -148,6 +156,7 @@ class Sequence :
     def change_level(self,win):
         if win == 1:
             self.level += 1
+            print("[Logs] > L'ordinateur génère une séquence..")
         if win == 0:   
             global name
             print("[Logs] > Defi ", defi)
@@ -205,10 +214,10 @@ playerOne = Sequence()
 
 #=============================================================================================================  Variables
 menu , pause , play , aide, score, playmenu, challenge, speedmenu, sensgame =  1 , 0 , 0, 0, 0, 0, 0, 0, 0  # Acces aux boucles 
-choix_menu, choix_playmenu, choix_challenge, choix_speed, choix_blind = 0, 0, 0, 0, 0
-tourOrdi , tourPlayer = 0,0
-nosound, blindness = 0,0
-#------
+choix_menu, choix_playmenu, choix_challenge, choix_speed, choix_blind = 0, 0, 0, 0, 0 #choix des menus
+tourOrdi , tourPlayer = 0,0 #tour pour les séquences
+nosound, blindness = 0,0 #Event Game
+#------    Sélection Menu
 x = -0
 w = 1
 
@@ -224,19 +233,16 @@ w4 = 1
 x5 = -0
 w5 = 1
 
-#------
+#------ Mise à jours des variables de jeux
 a = 0
 seq_ordi, seq_joueur = '' , ''
 compteur , go = 0, 0
 dataload = 1
 #=========================================================================================== Création de la fenètre principal
+
 screen = pygame.display.set_mode((500,600))
 
-
 #========================================================================================================== Boucle principale    
-#==============================================================================================================|- Menu accueil
-#==============================================================================================================|- Pause
-#==============================================================================================================|- Jeu
 
 while True :
     
@@ -284,7 +290,8 @@ while True :
             textMenu = Texte('Aide', 60+x, vert, (cadre.centerx,cadre.top + 150)).affiche()
             if event.type == KEYDOWN and event.key == K_RETURN :
                 menu = 0        
-                aide = 1   
+                aide = 1 
+                print("[Logs] > Menu aide ouvert.")
         if choix_menu == 2:
             textMenu = Texte('Score', 60+x, bleu, (cadre.centerx,cadre.top + 200)).affiche()
             if event.type == KEYDOWN and event.key == K_RETURN :
@@ -301,6 +308,7 @@ while True :
                 
 
     while playmenu:
+        
         speed = 75
         for event in pygame.event.get():
             if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -308,6 +316,7 @@ while True :
                 choix_menu = 0
                 menu = 1
                 choix_playmenu = 0
+                print("[Logs] > Menu principale ouvert.")
             if event.type == KEYDOWN :
                 if event.key == K_UP:
                         choix_playmenu -= 1
@@ -340,24 +349,28 @@ while True :
                 playmenu = 0
                 play = 1
                 tourOrdi = 1
+                print("[Logs] > Jeu en cours d'execution..")
                                 
         if choix_playmenu == 1 :
             textMenu = Texte('Challenges', 60+x2, jaune, (cadre.centerx,cadre.top + 150)).affiche()
             if event.type == KEYDOWN and event.key == K_RETURN :
                 challenge = 1
                 playmenu = 0
+                print("[Logs] > Menu challenge ouvert.")
 
         if choix_playmenu == 2 :
             textMenu = Texte('Speed Run', 60+x2, orange, (cadre.centerx,cadre.top + 200)).affiche()
             if event.type == KEYDOWN and event.key == K_RETURN :
                 playmenu = 0
                 speedmenu = 1
+                print("[Logs] > Menu SpeedRun ouvert.")
         
         if choix_playmenu == 3:
             textMenu = Texte('No Sense', 60+x2, rouge, (cadre.centerx,cadre.top + 250)).affiche()
             if event.type == KEYDOWN and event.key == K_RETURN :
                 playmenu = 0
                 sensgame = 1
+                print("[Logs] > Menu des sens ouvert.")
         
         pygame.time.wait(speed)
         pygame.display.flip()
@@ -365,6 +378,7 @@ while True :
 ####################################################################################################
 
     while challenge:
+        
         speed = 75
         
         for event in pygame.event.get():
@@ -372,6 +386,7 @@ while True :
                 challenge = 0
                 playmenu = 1
                 choix_challenge = 0
+                print("[Logs] > PlayMenu ouvert.")
             if event.type == KEYDOWN :
                 if event.key == K_UP:
                         choix_challenge -= 1
@@ -428,6 +443,7 @@ while True :
         pygame.display.flip()
 
     while speedmenu:
+        
         speed = 75
         
         for event in pygame.event.get():
@@ -435,6 +451,7 @@ while True :
                 speedmenu = 0
                 playmenu = 1
                 choix_speed = 0
+                print("[Logs] > PlayMenu ouvert.")
             if event.type == KEYDOWN :
                 if event.key == K_UP:
                         choix_speed -= 1
@@ -488,6 +505,7 @@ while True :
         pygame.display.flip()
 
     while sensgame:
+        
         speed = 75
         
         for event in pygame.event.get():
@@ -495,6 +513,7 @@ while True :
                 sensgame = 0
                 playmenu = 1
                 choix_blind = 0
+                print("[Logs] > PlayMenu ouvert.")
             if event.type == KEYDOWN :
                 if event.key == K_UP:
                         choix_blind -= 1
@@ -547,7 +566,6 @@ while True :
 #################################################################################################################
 
     while aide:
-
         screen.fill(noir)
         cadre = Draw_rect().gen((46,52,54),((0,200),(500,250)))
         textMenu = Texte('Commandes :', 40, noir, (125,cadre.top + 30)).affiche()
@@ -600,11 +618,11 @@ while True :
                         ScorePlayer.append(loading)
 
                         loading = ()
-                        print(loading)
-                        print(ScorePlayer)
+                        print("[Logs] (loading) > " + str(loading))
+                        print("[Logs] (ScorePlayer) > " + str(ScorePlayer))
                         ScorePlayer.sort(key=lambda x:x[1])
                         ScorePlayer.reverse()
-                        print(ScorePlayer)
+                        print("[Logs] (ScorePlayer) > " + str(ScorePlayer))
 
             #--------------------------------------------------
 
@@ -690,7 +708,7 @@ while True :
 
 
     while play:
-    
+        
         if playerOne.level == 0:
             play , tourOrdi ,menu = 0 , 0 , 1
             playerOne = Sequence()
@@ -701,6 +719,7 @@ while True :
         seq_joueur = ''
         
         while tourOrdi :
+            
             if rundefi == 0:
                 speed = 250
             if rundefi == 1:
@@ -741,6 +760,7 @@ while True :
                     tourOrdi = 0
                     tourPlayer = 1
                     go = 0 
+                    print("[Logs] > Tour du joueur en cours..")
 
             screen.blit((Image(centre)),(0,0))
             screen.blit((Image(fond)),(0,0))
@@ -793,9 +813,12 @@ while True :
                 if seq_joueur != seq_ordi :
                     playerOne.change_level(0)
                     play , tourOrdi ,menu = 0 , 0 , 1
+                    print("[Logs] > Séquence échoué")
                     playerOne = Sequence()
                 if seq_joueur == seq_ordi :
                     playerOne.change_level(1)
+                    print("[Logs] > Séquence réussi")
+                    print("[Logs] > +1 level")
                 
                 
                 
