@@ -13,5 +13,3 @@ Les scores sont stocké dans le fichier yaml.
 Ne modifié pas les noms, et les compositions des fichiers sous peine de bug.
 
 Je vous souhaite un bon jeu :D
-
-/!\ Mode de jeu avec les sens en cours de développement /!\
