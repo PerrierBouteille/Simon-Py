@@ -9,10 +9,37 @@ from random import randrange
 from database import *
 import yaml
 from operator import itemgetter
+from time import *
 
 pygame.init()
 pygame.mixer.pre_init(44100, 16, 1, 4096)
 pygame.display.set_caption("Simon - Py")
+screen = pygame.display.set_mode((500,600))
+font = pygame.font.SysFont('Comic Sans MS,Arial', 24)
+X, Y = 10, 0
+display_surface = pygame.display.set_mode((X, Y ))
+load = pygame.image.load('Game/data/titre1.png')
+display_surface.blit(load, (10, 0))
+pygame.display.flip()
+charg = font.render('Chargement.', True, (255,255,255))
+author = font.render('Developper par Perrier', True, (55,55,55))
+screen.blit(charg, (185,300))
+screen.blit(author, (130,325))
+pygame.display.flip()
+sleep(1)
+charg = font.render('Chargement..', True, (255,255,255))
+author = font.render('Developper par Perrier', True, (155,155,155))
+screen.blit(charg, (185,300))
+screen.blit(author, (130,325))
+pygame.display.flip()
+sleep(1)
+charg = font.render('Chargement...', True, (255,255,255))
+author = font.render('Developper par Perrier', True, (255,255,255))
+screen.blit(charg, (185,300))
+screen.blit(author, (130,325))
+pygame.display.flip()
+sleep(1)
+
 #================================================================================================================= Ressources
 
 #=== liste des couleur utilisé , rangé suivant cet ordre ---> vert,rouge,bleu,jaune
@@ -122,24 +149,65 @@ class Sequence :
         if win == 1:
             self.level += 1
         if win == 0:   
+            global name
             print("[Logs] > Defi ", defi)
             print("[Logs] > self.level ", self.level)
-            name = input("Vôtre Pseudo : ")
-                       
+            BLUE = (40, 120, 230)
+            GREEN = (40, 230, 120)
+            
+            pygame.init()
+            screen = pygame.display.set_mode((640, 480))
+            center_x, center_y = 320, 240
+            
+            clock = pygame.time.Clock()
+            font = pygame.font.SysFont('Comic Sans MS,Arial', 24)
+            prompt = font.render('Entrez vôtre pseudo :', True, BLUE)
+            prompt_rect = prompt.get_rect(center=(center_x, center_y))
+            
+            name = ""
+            user_input = font.render(name, True, GREEN)
+            user_input_rect = user_input.get_rect(topleft=prompt_rect.topright)
+            
+            continuer = True
+            
+            while continuer:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        continuer = False
+                        break
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                            continuer = False
+                            break
+                        elif event.key == pygame.K_BACKSPACE:
+                            name = name[:-1]
+                        else:
+                            name += event.unicode
+                        user_input = font.render(name, True, GREEN)
+                        user_input_rect = user_input.get_rect(topleft=prompt_rect.topright)
+            
+                clock.tick(30)
+            
+                screen.fill(0)
+                screen.blit(prompt, prompt_rect)
+                screen.blit(user_input, user_input_rect)
+                pygame.display.flip()
+            
+            print("[Logs] (Pseudo) > ", str(name))
             if (defi) == self.level :
                 score = 0
             else :
                 score = self.level - 1
             Database(name,score)
-    
-    
+            screen = pygame.display.set_mode((500,600))
            
 playerOne = Sequence()
 
 #=============================================================================================================  Variables
 menu , pause , play , aide, score, playmenu, challenge, speedmenu, sensgame =  1 , 0 , 0, 0, 0, 0, 0, 0, 0  # Acces aux boucles 
 choix_menu, choix_playmenu, choix_challenge, choix_speed, choix_blind = 0, 0, 0, 0, 0
-tourOrdi , tourPlayer = 0,0 
+tourOrdi , tourPlayer = 0,0
+nosound, blindness = 0,0
 #------
 x = -0
 w = 1
@@ -155,6 +223,7 @@ w4 = 1
 
 x5 = -0
 w5 = 1
+
 #------
 a = 0
 seq_ordi, seq_joueur = '' , ''
@@ -456,7 +525,7 @@ while True :
                 blindness = 1
                 play = 1
                 tourOrdi = 1
-                speedmenu = 0
+                sensgame = 0
                 
                 
         if choix_blind == 1:
@@ -465,7 +534,7 @@ while True :
                 nosound = 1
                 play = 1
                 tourOrdi = 1
-                speedmenu = 0
+                sensgame = 0
 
         if choix_blind == 2:
             textMenu = Texte('Soon...', 60+x5, rouge, (cadre.centerx,cadre.top + 225)).affiche()
@@ -659,10 +728,10 @@ while True :
                 if a % 2 == 0 :
                 
                     if compteur != playerOne.level :
-                        #if sound == 0:
-                        liste_son[int(seq_ordi[compteur])].play()
-                        # if blind == 0:
-                        Draw_rect().gen(couleur_clair[int(seq_ordi[compteur])],liste_pos[int(seq_ordi[compteur])])
+                        if nosound != 1:
+                            liste_son[int(seq_ordi[compteur])].play()
+                        if blindness != 1:
+                            Draw_rect().gen(couleur_clair[int(seq_ordi[compteur])],liste_pos[int(seq_ordi[compteur])])
                         compteur += 1
                             
                 
