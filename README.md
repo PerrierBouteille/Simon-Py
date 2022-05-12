@@ -16,3 +16,6 @@ Ne modifié pas les noms, et les compositions des fichiers sous peine de bug.
 Je vous souhaite un bon jeu :D
 
 /!\ Si le Run.sh ne marche pas utilisé le Run.bat pour les utilisateurs Windows /!\
+
+Bug:
+  - Le fichier Run.bat n'enregistre pas les scores dans la base de donnée yaml
