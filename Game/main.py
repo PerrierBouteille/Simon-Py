@@ -17,6 +17,9 @@ print("Démarrage en cours..")
 pygame.init()
 pygame.mixer.pre_init(44100, 16, 1, 4096)
 pygame.display.set_caption("Simon - Py")
+i_icon = 'Game\data\icon.png'
+icon = pygame.image.load(i_icon)
+pygame.display.set_icon(icon)
 screen = pygame.display.set_mode((500,600))
 font = pygame.font.SysFont('Comic Sans MS,Arial', 24)
 X, Y = 10, 0
