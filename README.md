@@ -14,3 +14,5 @@ Les scores sont stocké dans le fichier yaml.
 Ne modifié pas les noms, et les compositions des fichiers sous peine de bug.
 
 Je vous souhaite un bon jeu :D
+
+/!\ Si le Run.sh ne marche pas utilisé le Run.bat pour les utilisateurs Windows /!\
