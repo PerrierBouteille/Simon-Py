@@ -16,3 +16,10 @@ Ne modifié pas les noms, et les compositions des fichiers sous peine de bug.
 Je vous souhaite un bon jeu :D
 
 /!\ Si le Run.sh ne marche pas utilisé le Run.bat pour les utilisateurs Windows /!\
+
+
+Étape si vous n'avez pas python:
+
+1. Installer python 3.10 avec ce lien: https://www.python.org/downloads/release/python-3104/
+2. Déziper le fichier et lancer le Install.bat ou Install.sh
+3. Une fois tout cela fait vous pouvez démarrer le fichier Run.bat ou Run.sh (Les logs de ce fichier seront dans ColorGame.log)
