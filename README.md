@@ -17,6 +17,7 @@ Je vous souhaite un bon jeu :D
 
 /!\ Si le Run.sh ne marche pas utilisé le Run.bat pour les utilisateurs Windows /!\
 
+→ La navigation dans le jeu se fait avec les fleches, la touche entré et la barre d'espace pour lancer les séquences.
 
 Étape si vous n'avez pas python:
 
