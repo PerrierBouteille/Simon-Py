@@ -584,7 +584,7 @@ while True :
         
         screen.fill(noir)
         cadre = Draw_rect().gen((46,52,54),((0,100),(500,400)))
-        textMenu = Texte('Meilleurs Scores', 40, noir, (cadre.centerx,cadre.top + 30)).affiche()
+        textMenu = Texte('Meilleurs Scores', 40, blanc, (cadre.centerx,cadre.top + 30)).affiche()
         textMenu = Texte('____________________________________', 40, noir, (cadre.centerx,cadre.top + 35)).affiche()
         pygame.time.wait(speed)
         pygame.display.flip()
