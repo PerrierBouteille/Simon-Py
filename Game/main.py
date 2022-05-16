@@ -162,6 +162,7 @@ class Sequence :
             print("[Logs] > self.level ", self.level)
             BLUE = (40, 120, 230)
             GREEN = (40, 230, 120)
+            RED = (225,0,0)
             
             pygame.init()
             screen = pygame.display.set_mode((640, 480))
@@ -169,6 +170,9 @@ class Sequence :
             
             clock = pygame.time.Clock()
             font = pygame.font.SysFont('Comic Sans MS,Arial', 24)
+            lose = pygame.font.SysFont('Comic Sans MS,Arial', 36)
+            title = lose.render('Loserrrr !', True, RED)
+            title_rect = title.get_rect(center=(center_x, 175))
             prompt = font.render('Entrez vôtre pseudo :', True, BLUE)
             prompt_rect = prompt.get_rect(center=(center_x, center_y))
             
@@ -197,6 +201,7 @@ class Sequence :
                 clock.tick(30)
             
                 screen.fill(0)
+                screen.blit(title, title_rect)
                 screen.blit(prompt, prompt_rect)
                 screen.blit(user_input, user_input_rect)
                 pygame.display.flip()
