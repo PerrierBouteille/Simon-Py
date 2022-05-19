@@ -42,16 +42,17 @@ while run:
         rpl = randrange(4)
         slp = randrange(3)
         charg = font.render('Chargement ', True, (255,255,255))
-        barcharg = font.render(chrg, True, (255,255,255))
+        barcharg = font.render(chrg, True, (0,225,0))
         chrg = str(chrg.replace(' ','/', rpl))
         print('Chargement : ' + str(chrg))
         screen.blit(charg, (185,290))
         screen.blit(barcharg, (125,325))
         pygame.display.flip()
         sleep(slp)
-        if chrg == '//////            ':
+        ch +=1
+        if ch == 3:
             print('Chargement des data..')
-        if chrg == '////////////      ' or chrg == '///////////      ' or chrg == '/////////        ':
+        if ch == 11:
             print('Chargement de la base de donné..')
         if chrg == '//////////////////':
             run = 0
