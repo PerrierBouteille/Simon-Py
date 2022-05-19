@@ -13,33 +13,51 @@ from time import *
 
 #Démarrage du jeu / Menu de chargement
 
-print("Démarrage en cours..")
-pygame.init()
-pygame.mixer.pre_init(44100, 16, 1, 4096)
-pygame.display.set_caption("Simon - Py")
-i_icon = 'Game\data\logo.png'
-icon = pygame.image.load(i_icon)
-pygame.display.set_icon(icon)
-screen = pygame.display.set_mode((500,600))
-font = pygame.font.SysFont('Comic Sans MS,Arial', 24)
-X, Y = 10, 0
-display_surface = pygame.display.set_mode((X, Y ))
-load = pygame.image.load('Game/data/titre1.png')
-display_surface.blit(load, (10, 0))
-pygame.display.flip()
-charg = font.render('Chargement.', True, (255,255,255))
-author = font.render('Developpé par Perrier', True, (180,180,180))
-screen.blit(charg, (185,300))
-screen.blit(author, (130,325))
-pygame.display.flip()
-sleep(1)
-charg = font.render('Chargement..', True, (255,255,255))
-screen.blit(charg, (185,300))
-pygame.display.flip()
-sleep(1)
-charg = font.render('Chargement...', True, (255,255,255))
-screen.blit(charg, (185,300))
-pygame.display.flip()
+run = 1
+while run:
+    print("Démarrage en cours..")
+    pygame.init()
+    pygame.display.set_caption("Simon - Py")
+    i_icon = 'Game\data\logo.png'
+    icon = pygame.image.load(i_icon)
+    pygame.display.set_icon(icon)
+    screen = pygame.display.set_mode((500,600))
+    screen.fill((0,0,0))
+    font = pygame.font.SysFont('Comic Sans MS,Arial', 24)
+    load = pygame.image.load('Game/data/titre1.png')
+    screen.blit(load, (10, 0))
+    pygame.display.flip()
+    author = font.render('Developpé par Perrier', True, (180,180,180))
+    screen.blit(author, (130,350))
+    bar1 = font.render('__________________', True, (255,255,255))
+    chrg = '                  '
+    bar2 = font.render('__________________', True, (255,255,255))
+    screen.blit(bar1, (125,300))
+    screen.blit(bar2, (125,325))
+    chrgnb = 18
+    print('Préparation des modules..')
+    for i in range(chrgnb):
+        if  i <= 1:
+            print('Chargement des données..')
+        rpl = randrange(4)
+        slp = randrange(3)
+        charg = font.render('Chargement ', True, (255,255,255))
+        barcharg = font.render(chrg, True, (255,255,255))
+        chrg = str(chrg.replace(' ','/', rpl))
+        print('Chargement : ' + str(chrg))
+        screen.blit(charg, (185,290))
+        screen.blit(barcharg, (125,325))
+        pygame.display.flip()
+        sleep(slp)
+        if chrg == '//////            ':
+            print('Chargement des data..')
+        if chrg == '////////////      ' or chrg == '///////////      ' or chrg == '/////////        ':
+            print('Chargement de la base de donné..')
+        if chrg == '//////////////////':
+            run = 0
+            screen.blit(barcharg, (125,325))
+            pygame.display.flip()
+            break
 sleep(1)
 print("_______________________________________")
 print("                                       ")
