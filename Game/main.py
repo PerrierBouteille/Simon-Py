@@ -14,6 +14,7 @@ from time import *
 #Démarrage du jeu / Menu de chargement
 
 run = 1
+ch = 0
 while run:
     print("Démarrage en cours..")
     pygame.init()
