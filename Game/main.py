@@ -5,7 +5,7 @@
 from cProfile import run
 import pygame
 from pygame.locals import *
-from random import randrange 
+from random import *
 from database import *
 import yaml
 from operator import itemgetter
@@ -13,54 +13,126 @@ from time import *
 
 #Démarrage du jeu / Menu de chargement
 
-run = 1
+class TextProgress:
+    def __init__(self, font, message, color, bgcolor):
+        self.font = font
+        self.message = message
+        self.color = color
+        self.bgcolor = bgcolor
+        self.offcolor = [c^40 for c in color]
+        self.notcolor = [c^0xFF for c in color]
+        self.text = font.render(message, 0, (255,0,0), self.notcolor)
+        self.text.set_colorkey(1)
+        self.outline = self.textHollow(font, message, color)
+        self.bar = pygame.Surface(self.text.get_size())
+        self.bar.fill(self.offcolor)
+        width, height = self.text.get_size()
+        stripe = Rect(0, height/2, width, height/4)
+        self.bar.fill(color, stripe)
+        self.ratio = width / 100.0
+
+    def textHollow(self, font, message, fontcolor):
+        base = font.render(message, 0, fontcolor, self.notcolor)
+        size = base.get_width() + 2, base.get_height() + 2
+        img = pygame.Surface(size, 16)
+        img.fill(self.notcolor)
+        base.set_colorkey(0)
+        img.blit(base, (0, 0))
+        img.blit(base, (2, 0))
+        img.blit(base, (0, 2))
+        img.blit(base, (2, 2))
+        base.set_colorkey(0)
+        base.set_palette_at(1, self.notcolor)
+        img.blit(base, (1, 1))
+        img.set_colorkey(self.notcolor)
+        return img
+
+    def render(self, percent=50):
+        surf = pygame.Surface(self.text.get_size())
+        if percent < 100:
+            surf.fill(self.bgcolor)
+            surf.blit(self.bar, (0,0), (0, 0, percent*self.ratio, 100))
+        else:
+            surf.fill(self.color)
+            global finished
+            finished = 1
+        surf.blit(self.text, (0,0))
+        #surf.blit(self.outline, (-1,-1))
+        surf.set_colorkey(self.notcolor)
+        return surf
+
+
+
+entry_info = '/////////////////////////'
+icon = pygame.image.load('Game/data/logo.png')
+load = pygame.image.load('Game/data/titre1.png')
 ch = 0
-while run:
-    print("Démarrage en cours..")
+
+#this code will display our work, if the script is run...
+if __name__ == '__main__':
+    import random
     pygame.init()
     pygame.display.set_caption("Simon - Py")
-    i_icon = 'Game\data\logo.png'
-    icon = pygame.image.load(i_icon)
+    screen = pygame.display.set_mode((500, 600))
     pygame.display.set_icon(icon)
-    screen = pygame.display.set_mode((500,600))
-    screen.fill((0,0,0))
-    font = pygame.font.SysFont('Comic Sans MS,Arial', 24)
-    load = pygame.image.load('Game/data/titre1.png')
     screen.blit(load, (10, 0))
+
+    #create our fancy text renderer
+    font = pygame.font.Font(None, 60)
+    font2 = pygame.font.SysFont('Comic Sans MS,Arial', 24)
+    font3 = pygame.font.SysFont(None,22)
+    white = 0, 225, 0
+    renderer = TextProgress(font, entry_info, white, (40, 40, 40))
+    text = renderer.render(0)
+
+    #create a window the correct size
+    
+    screen.blit(text, (115, 330))
+    bar1 = font.render(' ____________ ', True, (255,255,255))
+    bar2 = font.render('|____________|', True, (255,255,255))
+    author = font2.render('Chargement..', True, (255,255,255))
+    screen.blit(author, (180,280))
+    screen.blit(bar1, (105,290))
+    screen.blit(bar2, (105,330))
+    
     pygame.display.flip()
-    author = font.render('Developpé par Perrier', True, (180,180,180))
-    screen.blit(author, (130,350))
-    bar1 = font.render('__________________', True, (255,255,255))
-    chrg = '                  '
-    bar2 = font.render('__________________', True, (255,255,255))
-    screen.blit(bar1, (125,300))
-    screen.blit(bar2, (125,325))
-    chrgnb = 18
-    print('Préparation des modules..')
-    for i in range(chrgnb):
-        if  i <= 1:
-            print('Chargement des données..')
-        rpl = randrange(4)
-        slp = randrange(3)
-        charg = font.render('Chargement ', True, (255,255,255))
-        barcharg = font.render(chrg, True, (0,225,0))
-        chrg = str(chrg.replace(' ','/', rpl))
-        print('Chargement : ' + str(chrg))
-        screen.blit(charg, (185,290))
-        screen.blit(barcharg, (125,325))
+
+    progress = 1
+
+    #wait for the finish
+    finished = 0
+    while not finished:
+        dly = randint(160,640)
+        pygame.time.delay(120)
+        ch += 1
+        for event in pygame.event.get():
+            if event.type in (QUIT,KEYDOWN,MOUSEBUTTONDOWN):
+                finished = 1
+        
+        progress = (progress + random.randint(0,3)) % 120
+        text = renderer.render(progress)
+        screen.blit(text, (115, 330))
+        if ch == 2:
+            donn1 = font3.render('Chargement des données..', True, (200,200,200))
+            screen.blit(donn1,(115,390))
+        if ch == 13:
+            donn2 = font3.render('Chargement des données.. Ok', True, (200,200,200))
+            screen.blit(donn2,(115,390))
+        if ch == 17:
+            data1 = font3.render('Chargement des datas..', True, (200,200,200))
+            screen.blit(data1,(115,410))
+        if ch == 33:
+            data2 = font3.render('Chargement des datas.. Ok', True, (200,200,200))
+            screen.blit(data2,(115,410))
+        if ch == 39:
+            db1 = font3.render('Chargement de la DataBase..', True, (200,200,200))
+            screen.blit(db1,(115,430))
+        if ch == 54:
+            db2 = font3.render('Chargement de la DataBase.. Ok', True, (200,200,200))
+            screen.blit(db2,(115,430))
         pygame.display.flip()
-        sleep(slp)
-        ch +=1
-        if ch == 3:
-            print('Chargement des data..')
-        if ch == 11:
-            print('Chargement de la base de donné..')
-        if chrg == '//////////////////':
-            run = 0
-            screen.blit(barcharg, (125,325))
-            pygame.display.flip()
-            break
-sleep(1)
+
+
 print("_______________________________________")
 print("                                       ")
 print(" Simon-Py vous souhaite la bienvenue ! ")
