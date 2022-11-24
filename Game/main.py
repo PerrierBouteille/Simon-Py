@@ -678,36 +678,35 @@ while True :
 
 
     while score:
-        
+
         screen.fill(noir)
         cadre = Draw_rect().gen((46,52,54),((0,100),(500,400)))
         textMenu = Texte('Meilleurs Scores', 40, blanc, (cadre.centerx,cadre.top + 30)).affiche()
         textMenu = Texte('____________________________________', 40, noir, (cadre.centerx,cadre.top + 35)).affiche()
-        pygame.time.wait(speed)
-        pygame.display.flip()
+        #pygame.time.wait(speed)
 
         for event in pygame.event.get():
             if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE :
                 score = 0
                 menu = 1
                 dataload = 0
-        
+
         if dataload == 1:
             dataload = 0
             loading = ()
             ScorePlayer = []
             with open('Game/database.yaml') as f:
-            
+
                 topscores = yaml.load_all(f, Loader=yaml.SafeLoader)
 
                 for doc in topscores:
-                
+
                     for k, v in doc.items():
                         print("[Logs] > ", k, "->", v)
-                        
+
                         v = str(v).replace("{'score': '", "")
                         v = v.replace("'}", "")
-                        
+
                         loading += (k,)
                         loading += (int(v),)
 
@@ -720,52 +719,9 @@ while True :
                         ScorePlayer.reverse()
                         print("[Logs] (ScorePlayer) > " + str(ScorePlayer))
 
-            #--------------------------------------------------
-
-            if len(ScorePlayer) >= 1:
-                print("[Logs] > " + str(ScorePlayer[0]))
-                ScorePlayerAffichage1 = str(ScorePlayer[0][1])
-                print("[Logs] > " + ScorePlayerAffichage1)
-            if len(ScorePlayer) >= 2:
-                print("[Logs] > " + str(ScorePlayer[1]))
-                ScorePlayerAffichage2 = str(ScorePlayer[1][1])
-                print("[Logs] > " + ScorePlayerAffichage2)
-            if len(ScorePlayer) >= 3:
-                print("[Logs] > " + str(ScorePlayer[2]))
-                ScorePlayerAffichage3 = str(ScorePlayer[2][1])
-                print("[Logs] > " + ScorePlayerAffichage3)
-            if len(ScorePlayer) >= 4:
-                print("[Logs] > " + str(ScorePlayer[3]))
-                ScorePlayerAffichage4 = str(ScorePlayer[3][1])
-                print("[Logs] > " + ScorePlayerAffichage4)
-            if len(ScorePlayer) >= 5:
-                print("[Logs] > " + str(ScorePlayer[4]))
-                ScorePlayerAffichage5 = str(ScorePlayer[4][1])
-                print("[Logs] > " + ScorePlayerAffichage5)
-            if len(ScorePlayer) >= 6:
-                print("[Logs] > " + str(ScorePlayer[5]))
-                ScorePlayerAffichage6 = str(ScorePlayer[5][1])
-                print("[Logs] > " + ScorePlayerAffichage6)
-            if len(ScorePlayer) >= 7:
-                print("[Logs] > " + str(ScorePlayer[6]))
-                ScorePlayerAffichage7 = str(ScorePlayer[6][1])
-                print("[Logs] > " + ScorePlayerAffichage7)
-            if len(ScorePlayer) >= 8:
-                print("[Logs] > " + str(ScorePlayer[7]))
-                ScorePlayerAffichage8 = str(ScorePlayer[7][1])
-                print("[Logs] > " + ScorePlayerAffichage8)
-            if len(ScorePlayer) >= 9:
-                print("[Logs] > " + str(ScorePlayer[8]))
-                ScorePlayerAffichage9 = str(ScorePlayer[8][1])
-                print("[Logs] > " + ScorePlayerAffichage9)
-            if len(ScorePlayer) >= 10:
-                print("[Logs] > " + str(ScorePlayer[9]))
-                ScorePlayerAffichage10 = str(ScorePlayer[9][1])
-                print("[Logs] > " + ScorePlayerAffichage10)
-            dataloaded = 1    
+            dataloaded = 1
 
         if dataloaded == 1:
-            #dataloaded = 0
             textMenu = Texte("Top 1 :", 40, jaune, (75,cadre.top + 75)).affiche()
             textMenu = Texte("Top 2 :", 40, argent, (75,cadre.top + 105)).affiche()
             textMenu = Texte("Top 3 :", 40, bronze, (75,cadre.top + 135)).affiche()
@@ -778,26 +734,26 @@ while True :
             textMenu = Texte("Top 10:", 40, blanc, (75,cadre.top + 345)).affiche()
 
             if len(ScorePlayer) >= 1:
-                textMenu = Texte(str(ScorePlayer[0][0]) + " | " + str(ScorePlayerAffichage1), 40, jaune, (cadre.centerx,cadre.top + 75)).affiche()
-            if len(ScorePlayer) >= 2:        
-                textMenu = Texte(str(ScorePlayer[1][0]) + " | " + str(ScorePlayerAffichage2), 40, argent, (cadre.centerx,cadre.top + 105)).affiche()
-            if len(ScorePlayer) >= 3:               
-                textMenu = Texte(str(ScorePlayer[2][0]) + " | " + str(ScorePlayerAffichage3), 40, bronze, (cadre.centerx,cadre.top + 135)).affiche()
-            if len(ScorePlayer) >= 4:                
-                textMenu = Texte(str(ScorePlayer[3][0]) + " | " + str(ScorePlayerAffichage4), 40, blanc, (cadre.centerx,cadre.top + 165)).affiche()
-            if len(ScorePlayer) >= 5:                
-                textMenu = Texte(str(ScorePlayer[4][0]) + " | " + str(ScorePlayerAffichage5), 40, blanc, (cadre.centerx,cadre.top + 195)).affiche()
-            if len(ScorePlayer) >= 6:                
-                textMenu = Texte(str(ScorePlayer[5][0]) + " | " + str(ScorePlayerAffichage6), 40, blanc, (cadre.centerx,cadre.top + 225)).affiche()
-            if len(ScorePlayer) >= 7:                
-                textMenu = Texte(str(ScorePlayer[6][0]) + " | " + str(ScorePlayerAffichage7), 40, blanc, (cadre.centerx,cadre.top + 255)).affiche()
-            if len(ScorePlayer) >= 8:                
-                textMenu = Texte(str(ScorePlayer[7][0]) + " | " + str(ScorePlayerAffichage8), 40, blanc, (cadre.centerx,cadre.top + 285)).affiche()
-            if len(ScorePlayer) >= 9:                
-                textMenu = Texte(str(ScorePlayer[8][0]) + " | " + str(ScorePlayerAffichage9), 40, blanc, (cadre.centerx,cadre.top + 315)).affiche()
-            if len(ScorePlayer) >= 10:                
-                textMenu = Texte(str(ScorePlayer[9][0]) + " | " + str(ScorePlayerAffichage10), 40, blanc, (cadre.centerx,cadre.top + 345)).affiche()
-            pygame.display.flip()
+                textMenu = Texte(str(ScorePlayer[0][0]) + " | " + str(ScorePlayer[0][1]), 40, jaune, (cadre.centerx,cadre.top + 75)).affiche()
+            if len(ScorePlayer) >= 2:
+                textMenu = Texte(str(ScorePlayer[1][0]) + " | " + str(ScorePlayer[1][1]), 40, argent, (cadre.centerx,cadre.top + 105)).affiche()
+            if len(ScorePlayer) >= 3:
+                textMenu = Texte(str(ScorePlayer[2][0]) + " | " + str(ScorePlayer[2][1]), 40, bronze, (cadre.centerx,cadre.top + 135)).affiche()
+            if len(ScorePlayer) >= 4:
+                textMenu = Texte(str(ScorePlayer[3][0]) + " | " + str(ScorePlayer[3][1]), 40, blanc, (cadre.centerx,cadre.top + 165)).affiche()
+            if len(ScorePlayer) >= 5:
+                textMenu = Texte(str(ScorePlayer[4][0]) + " | " + str(ScorePlayer[4][1]), 40, blanc, (cadre.centerx,cadre.top + 195)).affiche()
+            if len(ScorePlayer) >= 6:
+                textMenu = Texte(str(ScorePlayer[5][0]) + " | " + str(ScorePlayer[5][1]), 40, blanc, (cadre.centerx,cadre.top + 225)).affiche()
+            if len(ScorePlayer) >= 7:
+                textMenu = Texte(str(ScorePlayer[6][0]) + " | " + str(ScorePlayer[6][1]), 40, blanc, (cadre.centerx,cadre.top + 255)).affiche()
+            if len(ScorePlayer) >= 8:
+                textMenu = Texte(str(ScorePlayer[7][0]) + " | " + str(ScorePlayer[7][1]), 40, blanc, (cadre.centerx,cadre.top + 285)).affiche()
+            if len(ScorePlayer) >= 9:
+                textMenu = Texte(str(ScorePlayer[8][0]) + " | " + str(ScorePlayer[8][1]), 40, blanc, (cadre.centerx,cadre.top + 315)).affiche()
+            if len(ScorePlayer) >= 10:
+                textMenu = Texte(str(ScorePlayer[9][0]) + " | " + str(ScorePlayer[9][1]), 40, blanc, (cadre.centerx,cadre.top + 345)).affiche()
+        pygame.display.flip()
                         
     
 
